@@ -1,7 +1,8 @@
 import './Home.css';
 import * as React from 'react';
 import { io } from "socket.io-client";
-const ipAdress = '192.168.2.13:3050'
+
+const ipAdress = 'localhost:3050'
 const socket = io('http://' + ipAdress)
 
 type Data = {
@@ -24,7 +25,7 @@ const clearSongs = (number: number | false) => {
   } else {
     socket.emit('clear', 'all')
   }
-}
+};
 
 const displaySongs = (playlist: any) => {
   const playlistMap = playlist.map((song: any, index: any) => {
@@ -33,10 +34,11 @@ const displaySongs = (playlist: any) => {
   return (
     <ul>{playlistMap}</ul>
   )
-}
+};
 
 function Home () {
   const [data, setData]: any = React.useState({playlist: []});
+  // const [room, setRoom]: any = React.useState('');
 
   React.useEffect(() => {
     socket.on("playlist", (data: Data) => {
@@ -48,8 +50,17 @@ function Home () {
   return (
     <div className="App">
       <div className="Header">
-          Vo
+        VOPLAYER
       </div>
+      {/* <form>
+        <label>
+          Room:  
+        </label>
+        <input type="text" value={room} onChange={(event) => setRoom(event.target.value)}/>
+        <div className = "button" onClick={() => {enterRoom(room)}}>
+        Enter
+        </div>
+      </form> */}
       {displaySongs(data.playlist)}
       <div className = "button" onClick={() => {addSong('Madison beer')}}>
         add VOMB

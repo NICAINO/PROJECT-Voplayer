@@ -1,5 +1,5 @@
 const httpServer = require("http").createServer();
-const ipAdress = '192.168.2.13:3000'
+const ipAdress = 'localhost:3000'
 const io = require("socket.io")(httpServer,{
     cors: {
 	    origin: "http://" + ipAdress,

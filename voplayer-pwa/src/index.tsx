@@ -1,14 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Auth0Provider } from '@auth0/auth0-react';
 import './index.css';
 import Home from './Home';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <Home/>
-  </React.StrictMode>,
+  <Auth0Provider
+        domain="https://accounts.spotify.com/authorize"
+        clientId="df27f8d7f750447aafefa4cd5399d605"
+        redirectUri={window.location.origin}
+    >
+    <React.StrictMode>
+      <Home/>
+    </React.StrictMode>
+  </Auth0Provider>,
   document.getElementById('root')
 );
 
