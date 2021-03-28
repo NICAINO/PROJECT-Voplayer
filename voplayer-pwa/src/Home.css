@@ -1,0 +1,14 @@
+.App {
+  text-align: center;
+}
+
+.Header {
+  font-size: 3cm;
+}
+
+.Button {
+  width: 200px;
+  height: 80px;
+  background-color: blue;
+}
+
