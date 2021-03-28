@@ -40,4 +40,4 @@ io.on("connection", (socket) => {
 	console.log('Users: ', socket.rooms)
 	
 });
-httpServer.listen(port)
+httpServer.listen(port, () => console.log('Live on port: ', port))
