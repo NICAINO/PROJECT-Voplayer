@@ -1,15 +1,16 @@
-import './Home.css';
+import './Styling.css';
 import * as React from 'react';
 import { io } from "socket.io-client";
+import { NavLink } from 'react-router-dom';
 
 const ipAdress = 'localhost:3050'
 const socket = io('http://' + ipAdress)
 
 type Data = {
   playlist: Array<string>
-}
+};
 
-const addSong = (song: any) => {
+const addSong = (song: string) => {
   socket.emit('song', song)
   console.log('Emmitted song: ', song)
 };
@@ -29,41 +30,47 @@ const clearSongs = (number: number | false) => {
 
 const displaySongs = (playlist: any) => {
   const playlistMap = playlist.map((song: any, index: any) => {
-    return <div key={index}>{song}</div>
-  })
-  return (
-    <ul>{playlistMap}</ul>
-  )
+    return <div key={index}>Pokkoe {index + 1}: {song}</div>
+  });
+  if (playlistMap.length !== 0) {
+    return (
+      <div className="Playlist">{playlistMap}</div>
+    )
+  } else return null
 };
 
-function Home () {
-  const [data, setData]: any = React.useState({playlist: []});
-  // const [room, setRoom]: any = React.useState('');
+
+
+function Home (props: any) {
+  const [data, setData]: [any, Function] = React.useState({playlist: []});
+  const [song, setSong]: [string, Function] = React.useState('');
 
   React.useEffect(() => {
     socket.on("playlist", (data: Data) => {
       setData(data)
       console.log("Received: ", data)
-    })
-  }, []) //is dependecy array ofzo
+    });
+  }) //is dependecy array ofzo
 
   return (
     <div className="App">
       <div className="Header">
         VOPLAYER
       </div>
-      {/* <form>
-        <label>
-          Room:  
-        </label>
-        <input type="text" value={room} onChange={(event) => setRoom(event.target.value)}/>
-        <div className = "button" onClick={() => {enterRoom(room)}}>
-        Enter
-        </div>
-      </form> */}
-      {displaySongs(data.playlist)}
-      <div className = "button" onClick={() => {addSong('Madison beer')}}>
-        add VOMB
+      <input value={song} onChange={(event) => {setSong(event.target.value)}}/>
+      <NavLink 
+        to={{
+          pathname: "/Loading",
+          state: {
+            pog: 'POG'
+          }
+        }}
+        className="Button"
+      >
+          Ga loaden
+      </NavLink>
+      <div className = "Button" onClick={() => {addSong(song); setSong('')}}>
+        Voeg je pokkoe toe! ;-)
       </div>
       <div className="Button" onClick={() => {refreshPlaylist()}}>
         Refresh
@@ -71,6 +78,7 @@ function Home () {
       <div className="Button" onClick={() => {clearSongs(false)}}>
         clear
       </div>
+      {displaySongs(data.playlist)}
     </div>
   );
 };

@@ -21,7 +21,7 @@ io.on("connection", (socket) => {
             for(let i = 0; i < arg; i++)
                 data.playlist.splice(data.playlist.length-1)
         }
-        io.to('room').emit('playlist', data)
+        io.emit('playlist', data)
     });
 
     socket.on('refresh', () => {
@@ -32,11 +32,9 @@ io.on("connection", (socket) => {
 	socket.on('song', (arg) => {
 		let song = arg
 		data.playlist.push(song)
-		let msg = 'Added: ' + JSON.stringify(song) + 'to the playlist'
-		io.to('room').emit('playlist', data)
+		io.emit('playlist', data)
 	});
 	
-	socket.join('room')
 	console.log('Users: ', socket.rooms)
 	
 });

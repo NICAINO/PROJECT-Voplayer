@@ -1,0 +1,42 @@
+.App {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  border: 1px solid red;
+}
+
+.Header {
+  font-size: 10vw;
+  border: 1px solid green
+}
+
+.Button {
+  width: 200px;
+  height: 50px;
+  background-color: #0000ff50;
+  border: 1px solid yellow;
+  border-radius: 5px;
+}
+
+.Playlist {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 1px solid purple;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
