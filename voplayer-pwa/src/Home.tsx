@@ -58,15 +58,7 @@ function Home (props: any) {
         VOPLAYER
       </div>
       <input value={song} onChange={(event) => {setSong(event.target.value)}}/>
-      <NavLink 
-        to={{
-          pathname: "/Loading",
-          state: {
-            pog: 'POG'
-          }
-        }}
-        className="Button"
-      >
+      <NavLink className="Button" to={{pathname: "/Loading"}}>
           Ga loaden
       </NavLink>
       <div className = "Button" onClick={() => {addSong(song); setSong('')}}>
