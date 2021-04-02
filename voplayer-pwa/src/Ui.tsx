@@ -15,9 +15,10 @@ socket.on("searchAuth", (token: string) => {
 });
 
 const listSearch = (data: any) => {
+    //ik weet dat dit op een betere manier kan maar dit werkte dus vond het wel ff prima
     if (data.tracks) {
         console.log(data.tracks.items)
-        return data.tracks.items.map((song: any) => <Song
+        return data.tracks.items.map((song: any, index: number) => <Song
         src={song.album.images[2].url}
         song={song.name}
         artist={song.artists[0].name}
@@ -58,11 +59,6 @@ export default function Ui(props: any) {
                 Submit
             </div>
             {listSearch(searchData)}
-            <Song
-                src="https://images6.alphacoders.com/111/1115614.jpg"
-                song="Positions"
-                artist="Ariana Grande"
-            />
         </div>
     )
 }
