@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import * as Route from 'react-router-dom';
@@ -7,7 +5,6 @@ import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 
 import Home from './Home';
-import Loading from './Loading';
 import Ui from './Ui';
 
 ReactDOM.render(
@@ -16,9 +13,6 @@ ReactDOM.render(
       <Route.Switch>
         <Route.Route exact path="/">
           <Home/>
-        </Route.Route>
-        <Route.Route path="/Loading">
-          <Loading/>
         </Route.Route>
         <Route.Route path="/Ui">
           <Ui/>

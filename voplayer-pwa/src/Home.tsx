@@ -1,76 +1,51 @@
 import './Styling.css';
-import * as React from 'react';
-import { io } from "socket.io-client";
-import { NavLink } from 'react-router-dom';
+//import * as React from 'react';
+import { genUrl } from './modules/Authentication'
 
-const ipAdress = 'localhost:3050'
-const socket = io('http://' + ipAdress)
+// const addSong = (song: string) => {
+//   socket.emit('song', song)
+//   console.log('Emmitted song: ', song)
+// };
 
-type Data = {
-  playlist: Array<string>
-};
+// const refreshPlaylist = () => {
+//   socket.emit('refresh')
+//   console.log('demanded a refresh')
+// };
 
-const addSong = (song: string) => {
-  socket.emit('song', song)
-  console.log('Emmitted song: ', song)
-};
+// const clearSongs = (number: number | false) => {
+//   if (number !== false) {
+//     socket.emit('clear', number)
+//   } else {
+//     socket.emit('clear', 'all')
+//   }
+// };
 
-const refreshPlaylist = () => {
-  socket.emit('refresh')
-  console.log('demanded a refresh')
-};
+// const displaySongs = (playlist: any) => {
+//   const playlistMap = playlist.map((song: any, index: any) => {
+//     return <div key={index}>Pokkoe {index + 1}: {song}</div>
+//   });
+//   if (playlistMap.length !== 0) {
+//     return (
+//       <div className="Playlist">{playlistMap}</div>
+//     )
+//   } else return null
+// };
 
-const clearSongs = (number: number | false) => {
-  if (number !== false) {
-    socket.emit('clear', number)
-  } else {
-    socket.emit('clear', 'all')
-  }
-};
+async function authorize() {
+  const state = JSON.stringify(Math.random())
+  localStorage.setItem('state', state)
+  return state
+}
 
-const displaySongs = (playlist: any) => {
-  const playlistMap = playlist.map((song: any, index: any) => {
-    return <div key={index}>Pokkoe {index + 1}: {song}</div>
-  });
-  if (playlistMap.length !== 0) {
-    return (
-      <div className="Playlist">{playlistMap}</div>
-    )
-  } else return null
-};
-
-
-
-function Home (props: any) {
-  const [data, setData]: [any, Function] = React.useState({playlist: []});
-  const [song, setSong]: [string, Function] = React.useState('');
-
-  React.useEffect(() => {
-    socket.on("playlist", (data: Data) => {
-      setData(data)
-      console.log("Received: ", data)
-    });
-  }) //is dependecy array ofzo
-
+function Home() {
   return (
     <div className="App">
       <div className="Header">
         VOPLAYER
       </div>
-      <input value={song} onChange={(event) => {setSong(event.target.value)}}/>
-      <NavLink className="Button" to={{pathname: "/Loading"}}>
+      <div className="Button" onClick={() => authorize().then(state => window.location.href = genUrl(state))}>
           Ga loaden
-      </NavLink>
-      <div className = "Button" onClick={() => {addSong(song); setSong('')}}>
-        Voeg je pokkoe toe! ;-)
       </div>
-      <div className="Button" onClick={() => {refreshPlaylist()}}>
-        Refresh
-      </div>
-      <div className="Button" onClick={() => {clearSongs(false)}}>
-        clear
-      </div>
-      {displaySongs(data.playlist)}
     </div>
   );
 };

@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 export const genUrl = (state: string) => {
   const url = 'https://accounts.spotify.com/authorize'
     .concat('?client_id=df27f8d7f750447aafefa4cd5399d605')
@@ -8,7 +9,7 @@ export const genUrl = (state: string) => {
   return url
 };
 
-export const parseUrl = (url: any, state: string) => {
+export const parseUrl = (url: any, state: string | null) => {
   const params = new URLSearchParams(url)
   if(params.get('state') === state) {
     return url.match(/\#(?:access_token)\=([\S\s]*?)\&/)[1];
