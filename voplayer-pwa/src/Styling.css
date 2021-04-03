@@ -1,9 +1,54 @@
 .App {
   display: flex;
-  align-items: center;
   flex-direction: column;
-  text-align: center;
+  box-sizing: border-box;
+  width: 100vw;
+  height: 100vh;
   border: 1px solid red;
+  background: rgba(0,0,0,0.1);
+  backdrop-filter: blur(75px) contrast(90%);
+}
+
+.Wrapper {
+  display: flex;
+  flex-direction: row; 
+  box-sizing: border-box;
+  height: 90%;
+  border: 1px solid black;
+}
+
+.SearchBar {
+  display: flex;
+  flex-direction: row;
+  height: 10%;
+  border: 1px solid greenyellow;
+}
+
+.Player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  border: 1px solid green;
+  width: 60%;
+  height: 100%;
+}
+
+.PlayerImage {
+  border: 1px solid rgb(115, 181, 224);
+  width: 50%;
+  aspect-ratio: 1;
+  background-size: contain;
+}
+
+.Queue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  border: 1px solid plum;
+  width: 40%;
+  height: 100%;
 }
 
 .Header {
@@ -26,6 +71,13 @@
   border: 1px solid purple;
 }
 
+.SearchList {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 1px solid navy;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -33,10 +85,14 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-size: 100% 100%;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+
 

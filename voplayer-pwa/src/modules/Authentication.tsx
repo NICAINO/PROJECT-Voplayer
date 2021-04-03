@@ -5,7 +5,7 @@ export const genUrl = (state: string) => {
     .concat('&response_type=token')
     .concat('&redirect_uri=http://localhost:3000/Ui')
     .concat('&state=', state)
-    .concat('&scope=user-modify-playback-state')
+    .concat('&scope=user-modify-playback-state user-read-playback-state')
   return url
 };
 

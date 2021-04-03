@@ -4,7 +4,7 @@ import './songStyle.css';
 
 export default function Song(props: any) {
     return (
-        <div className="SongBox">
+        <div className="SongBox" onClick={props.onClick}>
             <div className="Song">
                 <img className="SongImg" src={props.src} alt="song"/>
                 <div className="SongDescription">

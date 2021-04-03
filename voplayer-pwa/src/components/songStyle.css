@@ -12,6 +12,8 @@
   justify-content: space-between;
   height: 5vw;
   width: 35vw;
+  margin-bottom: 1vw;
+  border: 1px solid brown;
 }
 
 .Song {
@@ -19,6 +21,7 @@
   box-sizing: border-box;
   flex-direction: row;
   align-items: center;
+  flex: 1;
 }
 
 .SongDescription {
@@ -26,8 +29,10 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
-  margin-left: 0.5%;
-  height: 55%;
+  margin-left: 1vw;
+  height: 60%;
+  flex: 1;
+  border: 1px solid olivedrab;
 }
 
 .SongTitle {

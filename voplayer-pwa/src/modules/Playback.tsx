@@ -18,9 +18,21 @@ export const addToQueue = async(token: string, uri: string) => {
     }
 };
 
+export const getSongInfo = async(token: string) => {
+    const Promise = axios({
+        url: 'https://api.spotify.com/v1/me/player/currently-playing'
+            .concat('?arket=NL'),
+        method: 'get',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        }
+    })
+    return Promise
+}
+
 export const search = async(searchToken: string, query: string) => {
     var string = query.trim().replace(/\s+/g, '+')
-    console.log("query: ", string)
     const Promise = axios({
         url: 'https://api.spotify.com/v1/search'
             .concat('?q=', string)
