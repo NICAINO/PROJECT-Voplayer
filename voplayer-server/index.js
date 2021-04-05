@@ -64,7 +64,6 @@ io.on("connection", (socket) => {
 	});
 	
 	console.log('Users: ', socket.rooms)
-    console.log(searchToken)
 	
 });
 httpServer.listen(port, () => console.log('Live on port: ', port))

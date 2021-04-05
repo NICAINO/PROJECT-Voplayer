@@ -50,11 +50,17 @@
 }
 
 .PlayerImage {
-  width: 65%;
+  width: 55%;
   aspect-ratio: 1;
   background-size: contain;
   box-shadow: 0.85vw 0.85vw 1vw #00000090;
   border-radius: 3px;
+}
+
+.ButtonHolder {
+  width: 100%;
+  display: flex;
+  align-content: center;
 }
 
 .Queue {

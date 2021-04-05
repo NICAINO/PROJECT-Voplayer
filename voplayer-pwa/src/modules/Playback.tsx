@@ -31,6 +31,61 @@ export const getSongInfo = async(token: string) => {
     return Promise
 }
 
+export const play = async(token: string) => {
+    // Er kunnen nummer uris doorgegeven worden om af te spelen!!
+    const Promise = axios({
+        url: 'https://api.spotify.com/v1/me/player/play',
+        method: 'put',
+        // data: undefined,
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        }
+    })
+    return Promise
+}
+
+export const pause = async(token: string) => {
+    // Er kunnen nummer uris doorgegeven worden om af te spelen!!
+    const Promise = axios({
+        url: 'https://api.spotify.com/v1/me/player/pause',
+        method: 'put',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        }
+    })
+    return Promise
+}
+
+export const nextSong = async(token: string) => {
+    const Promise = axios({
+        url: 'https://api.spotify.com/v1/me/player/next',
+        method: 'post',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        }
+    })
+    return Promise
+}
+
+export const previousSong = async(token: string) => {
+    const Promise = axios({
+        url: 'https://api.spotify.com/v1/me/player/previous',
+        method: 'post',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        }
+    })
+    return Promise
+}
+
 export const search = async(searchToken: string, query: string) => {
     var string = query.trim().replace(/\s+/g, '+')
     const Promise = axios({

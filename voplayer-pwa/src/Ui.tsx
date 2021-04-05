@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { parseUrl } from './modules/Authentication'
-import { addToQueue, getSongInfo, search } from './modules/Playback'
+import { addToQueue, getSongInfo, play, pause, search, nextSong, previousSong } from './modules/Playback'
 import { io } from "socket.io-client";
 
 import './Styling.css';
@@ -31,17 +31,14 @@ export default function Ui() {
         uri: 'spotify:track:3YmgsYX80v0EtBZekgcB6w',
         artist: 'Madison Beer',
     })
-
+    
     React.useEffect(() => {
         if (parseUrl(window.location.href, localStorage.getItem('state')) !== null) {
             setToken(parseUrl(window.location.href, localStorage.getItem('state')));
             window.history.replaceState({}, document.title, "/Ui");
         }
-    }, [token]);
-
-    React.useEffect(() => {
-        const interval = setInterval(() => {
-            console.log('gebeurd')
+        // Dit is de eerste keer meteen aan het begin (ik weet eig niet hoe maar dit fixed het (ontstaat wel een fout))
+        console.log('Afpelende nummer wordt voor het eerst opgehaald')
             getSongInfo(token)
             .then((res: any) => {
                 setCurrentSong({
@@ -52,7 +49,22 @@ export default function Ui() {
                     total_ms: res.data.item.duration_ms,
                 })
             });
-        }, currentSong.total_ms - currentSong.current_ms + 200);
+    }, [token]);
+
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            console.log('Afspelende nummer wordt opgehaald')
+            getSongInfo(token)
+            .then((res: any) => {
+                setCurrentSong({
+                    name: res.data.item.name,
+                    artist: res.data.item.artists[0].name,
+                    album_cover: res.data.item.album.images[0].url,
+                    current_ms: res.data.progress_ms,
+                    total_ms: res.data.item.duration_ms,
+                })
+            });
+        }, currentSong.total_ms - currentSong.current_ms + 200); 
         return () => clearInterval(interval);
     }, [token, currentSong])
 
@@ -117,6 +129,61 @@ export default function Ui() {
                     <div className="Player">
                         <p>{currentSong.name} from {currentSong.artist}</p>
                         <div className="PlayerImage" style={{backgroundImage: returnURL(currentSong.album_cover)}}/>
+                        {/* ik snap ook wel dat de jsx hier beter kan is gewoon voor de functies in playback.tsx */}
+                        <div className="Button" onClick={() => {
+                            console.log('Next')
+                            nextSong(token).then()
+                            getSongInfo(token)
+                                .then((res: any) => {
+                                    setCurrentSong({
+                                        name: res.data.item.name,
+                                        artist: res.data.item.artists[0].name,
+                                        album_cover: res.data.item.album.images[0].url,
+                                        current_ms: res.data.progress_ms,
+                                        total_ms: res.data.item.duration_ms,
+                                    })
+                                })
+                        }}>
+                            Next
+                        </div>
+                        <div className="Button" onClick={() => {
+                            console.log('Play')
+                            play(token).then()
+                            getSongInfo(token)
+                                .then((res: any) => {
+                                    setCurrentSong({
+                                        name: res.data.item.name,
+                                        artist: res.data.item.artists[0].name,
+                                        album_cover: res.data.item.album.images[0].url,
+                                        current_ms: res.data.progress_ms,
+                                        total_ms: res.data.item.duration_ms,
+                                    })
+                                })
+                            }}>
+                            Play
+                        </div>
+                        <div className="Button" onClick={() => {
+                            console.log('Pause')
+                            pause(token)
+                        }}>
+                            pause
+                        </div>
+                        <div className="Button" onClick={() => {
+                            console.log('Prev')
+                            previousSong(token).then()
+                            getSongInfo(token)
+                                .then((res: any) => {
+                                    setCurrentSong({
+                                        name: res.data.item.name,
+                                        artist: res.data.item.artists[0].name,
+                                        album_cover: res.data.item.album.images[0].url,
+                                        current_ms: res.data.progress_ms,
+                                        total_ms: res.data.item.duration_ms,
+                                    })
+                                })
+                            }}>
+                            Prev
+                        </div>
                     </div>
                     <div className="Queue">
                         <div className="Button" onClick={() => {socket.emit('searchAuth', 'new')}}>
@@ -132,7 +199,6 @@ export default function Ui() {
                                         current_ms: res.data.progress_ms,
                                         total_ms: res.data.item.duration_ms,
                                     })
-                                    console.log(currentSong)
                                 })
                             }}>
                             Test
@@ -140,6 +206,7 @@ export default function Ui() {
                         <div className="Button" onClick={() => addToQueue(token, selectedSong.uri).then(res => console.log(res))}>
                             Add song to queue
                         </div>
+                        
                         {listSearch(searchData)}
                     </div>
                 </div>
