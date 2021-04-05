@@ -14,14 +14,17 @@ socket.on("searchAuth", (token: string) => {
   searchToken = token;
 });
 
-export default function Ui(props: any) {
+export default function Ui() {
+    let timer: any = React.useRef(null)
     const [token, setToken]: [string, Function] = React.useState('');
     const [searchInput, setSearchInput]: [string, Function] = React.useState('')
     const [searchData, setSearchData]: [Array<string>, Function] = React.useState([])
     const [currentSong, setCurrentSong]: [any, Function] = React.useState({
         name: 'BOYSHIT',
         artist: 'Madison Beer',
-        album_cover: 'https://i.scdn.co/image/ab67616d0000b273b607cbee819047fc2e5c3ba4'
+        album_cover: 'https://i.scdn.co/image/ab67616d0000b273b607cbee819047fc2e5c3ba4',
+        current_ms: '0',
+        total_ms: '100000',
     })
     const [selectedSong, setSelectedSong]: [any, Function] = React.useState({
         name: 'BOYSHIT',
@@ -37,8 +40,30 @@ export default function Ui(props: any) {
     }, [token]);
 
     React.useEffect(() => {
-        console.log('Data:', searchData)
-    }, [searchData])
+        const interval = setInterval(() => {
+            console.log('gebeurd')
+            getSongInfo(token)
+            .then((res: any) => {
+                setCurrentSong({
+                    name: res.data.item.name,
+                    artist: res.data.item.artists[0].name,
+                    album_cover: res.data.item.album.images[0].url,
+                    current_ms: res.data.progress_ms,
+                    total_ms: res.data.item.duration_ms,
+                })
+            });
+        }, currentSong.total_ms - currentSong.current_ms + 200);
+        return () => clearInterval(interval);
+    }, [token, currentSong])
+
+    React.useEffect(() => {
+        if (searchInput !== '') {
+            clearTimeout(timer.current)
+            timer.current = setTimeout(()=>{search(searchToken, searchInput).then(data => setSearchData(data.data.tracks.items))}, 250)
+        } else {
+            setSearchData([])
+        }
+    }, [searchInput])
     
     React.useEffect(() => {
         console.log('Selected song:', selectedSong)
@@ -61,7 +86,8 @@ export default function Ui(props: any) {
                         uri: song.uri,
                         artists: song.artists[0].name,
                         album: song.album.images[0].url
-                    })
+                    });
+                    setSearchInput('')
                 }}
             />
         });
@@ -75,9 +101,18 @@ export default function Ui(props: any) {
     const returnURL = (url: string) => 'url(' + url + ')'
 
     return (
-        <body style={{backgroundImage: returnURL(selectedSong.album)}}>
+        <body style={{backgroundImage: returnURL(currentSong.album_cover)}}>
             <div className="App">
-                <div className="SearchBar"/>
+                <div className="TopBar">
+                    <input 
+                        className="SearchBar" 
+                        value={searchInput} 
+                        placeholder="Search"
+                        onChange={(event) => {
+                            setSearchInput(event.target.value);
+                        }}
+                    />
+                </div>
                 <div className="Wrapper">
                     <div className="Player">
                         <p>{currentSong.name} from {currentSong.artist}</p>
@@ -87,29 +122,24 @@ export default function Ui(props: any) {
                         <div className="Button" onClick={() => {socket.emit('searchAuth', 'new')}}>
                             Refresh token
                         </div>
-                        <input value={searchInput} onChange={(event) => {
-                            setSearchInput(event.target.value);
-                            }}/>
-                        <div className="Button" onClick={() => {
-                            search(searchToken, searchInput).then(data => setSearchData(data.data.tracks.items)
-                            )}}>
-                            Submit
-                        </div>
                         <div className="Button" onClick={() => {
                             getSongInfo(token)
                                 .then((res: any) => {
                                     setCurrentSong({
                                         name: res.data.item.name,
                                         artist: res.data.item.artists[0].name,
-                                        album_cover: res.data.item.album.images[0].url
+                                        album_cover: res.data.item.album.images[0].url,
+                                        current_ms: res.data.progress_ms,
+                                        total_ms: res.data.item.duration_ms,
                                     })
+                                    console.log(currentSong)
                                 })
                             }}>
                             Test
                         </div>
-                        {/* <div className="Button" onClick={() => addToQueue(token, selectedSong.uri).then(res => console.log(res))}>
+                        <div className="Button" onClick={() => addToQueue(token, selectedSong.uri).then(res => console.log(res))}>
                             Add song to queue
-                        </div> */}
+                        </div>
                         {listSearch(searchData)}
                     </div>
                 </div>

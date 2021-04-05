@@ -10,8 +10,8 @@
   flex-direction: row;
   box-sizing: border-box;
   justify-content: space-between;
-  height: 5vw;
-  width: 35vw;
+  aspect-ratio: 9;
+  width: 100%;
   margin-bottom: 1vw;
   border: 1px solid brown;
 }
@@ -29,17 +29,17 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
-  margin-left: 1vw;
-  height: 60%;
+  margin-left: 1%;
+  height: 80%;
   flex: 1;
   border: 1px solid olivedrab;
 }
 
 .SongTitle {
   font-weight: bold;
-  font-size: 1vw;
+  font-size: 1.5vw;
 }
 
 .Artist {
-  font-size: 0.8vw;
+  font-size: 1.2vw;
 }
