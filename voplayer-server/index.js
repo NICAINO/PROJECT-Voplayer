@@ -14,13 +14,18 @@ const data = {
 }
 let searchToken = '';
 
-axios({
-    url: 'https://accounts.spotify.com/api/token?grant_type=client_credentials',
-    method: 'post',
-    headers: {
-        Authorization: 'Basic ' + Buffer.from(auth.client_id + ':' + auth.client_secret).toString('base64')
-    }
-}).then(res => res.data.access_token).then(data => searchToken = data)
+const hourlyRefresh = async() => {() => {
+    setInterval(axios({
+        url: 'https://accounts.spotify.com/api/token?grant_type=client_credentials',
+        method: 'post',
+        headers: {
+            Authorization: 'Basic ' + Buffer.from(auth.client_id + ':' + auth.client_secret).toString('base64')
+        }
+    }).then(res => res.data.access_token).then(data => searchToken = data).then(console.log('Refreshed: '))
+    , 1000 * 60 * 59)}
+}
+
+hourlyRefresh()
 
 io.on("connection", (socket) => {
     io.to(socket.id).emit('playlist', data)
@@ -63,7 +68,7 @@ io.on("connection", (socket) => {
 		io.emit('playlist', data)
 	});
 	
-	console.log('Users: ', socket.rooms)
+	console.log('Rooms: ', socket.rooms)
 	
 });
 httpServer.listen(port, () => console.log('Live on port: ', port))

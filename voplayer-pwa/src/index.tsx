@@ -5,7 +5,7 @@ import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 
 import Home from './Home';
-import Ui from './Ui';
+import Ui from './host/Ui';
 
 ReactDOM.render(
   <Route.BrowserRouter>
