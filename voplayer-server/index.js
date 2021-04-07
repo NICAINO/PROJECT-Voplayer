@@ -28,12 +28,41 @@ const hourlyRefresh = async() => {() => {
 hourlyRefresh()
 
 io.on("connection", (socket) => {
-    io.to(socket.id).emit('playlist', data)
-    io.to(socket.id).emit('searchAuth', searchToken)
+    // io.to(socket.id).emit('searchAuth', searchToken)
+
+    socket.on('group', (arg) => {
+        if (arg === 'host') {
+            socket.join('host')
+            console.log('User: ', socket.id, 'joined as Host')
+        } else if (arg === 'client') {
+            socket.join('clients')
+            console.log('User: ', socket.id, 'joined as Client')
+        }
+    });
+
+    socket.on('current', (arg, data) => {
+        if (arg === 'update') {
+            io.to('clients').emit('currentUpdate', data)
+        }
+    });
+
+    socket.on('queue', (arg,  queue) => {
+        if (arg === 'update') {
+            io.to('clients').emit('queueUpdate', queue)
+        }
+    });
+
+    socket.on('commands', (arg) => {
+        if (arg === 'updateQueue') {
+            io.to('host').emit('commands', 'updateQueue')
+        }
+    });
+
+    //SOCKET ID FUNCTIONS
 
     socket.on('searchAuth', (arg) => {
         if (arg === 'refresh') {
-            io.to(socket.id).emit('searchAuth', searchToken)
+            io.emit('searchAuth', searchToken)
         } else if (arg === 'new') {
             console.log('generate new token')
             axios({
@@ -46,29 +75,7 @@ io.on("connection", (socket) => {
             io.emit('searchAuth', searchToken)
         }
     });
-
-    socket.on('clear', (arg) => {
-        if (arg === 'all') {
-            data.playlist = []
-        } else {
-            for(let i = 0; i < arg; i++)
-                data.playlist.splice(data.playlist.length-1)
-        }
-        io.emit('playlist', data)
-    });
-
-    socket.on('refresh', () => {
-        console.log(socket.id, ' demanded a refresh')
-        io.to(socket.id).emit('playlist', data)
-    });
-
-	socket.on('song', (arg) => {
-		let song = arg
-		data.playlist.push(song)
-		io.emit('playlist', data)
-	});
-	
-	console.log('Rooms: ', socket.rooms)
-	
+    console.log(io.allSockets())
 });
+
 httpServer.listen(port, () => console.log('Live on port: ', port))

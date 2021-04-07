@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import './songStyle.css';
 
 export default function Song(props: any) {
@@ -15,6 +13,11 @@ export default function Song(props: any) {
                         {props.artist}
                     </div>
                 </div>
+            </div>
+            <div className="Icon">
+                <div className="Dot"/>
+                <div className="Dot"/>
+                <div className="Dot"/>
             </div>
         </div>
     )

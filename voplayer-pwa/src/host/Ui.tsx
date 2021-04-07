@@ -1,13 +1,11 @@
 import * as React from 'react';
 import { parseUrl } from '../modules/Authentication'
 import { addToQueue, getSongInfo, play, pause, search, nextSong, previousSong } from '../modules/Playback'
-import { io } from "socket.io-client";
 
 import '../Styling.css';
-import Song from '../components/song'
+import Song from '../components/song';
+import SongList from '../components/songList';
 
-const ipAdress = 'localhost:3050'
-const socket = io('http://' + ipAdress)
 let searchToken: string = '';
 
 type SongType = {
@@ -15,17 +13,32 @@ type SongType = {
     artist: string,
     album_cover: string,
     uri: string
-}
+};
 
-socket.on("searchAuth", (token: string) => {
-  searchToken = token;
-});
 
-export default function Ui() {
+export default function Ui({socket}: any) {
+    // const socket = io('http://' + ipAdress)
+    // socket.emit('group', 'host');
+    // socket.on("searchAuth", (token: string) => {
+    //     searchToken = token;
+    // });
+    // socket.on('commands', (arg) => {
+    //     if (arg === 'updateQueue') {
+    //         socket.emit('queue', 'update', queue)
+    //     }
+    // });
+
+    React.useEffect(() => {
+        console.log('Je bent er!', socket)
+        socket.emit('group', 'host')
+    }, [socket])
+    
+    
     let updateSongTimer: any = React.useRef(null);
     const [token, setToken]: [string, Function] = React.useState('');
     const [searchInput, setSearchInput]: [string, Function] = React.useState('')
     const [searchData, setSearchData]: [Array<string>, Function] = React.useState([])
+    const [queue, setQueue]: [Array<SongType>, Function] = React.useState([])
     const [currentSong, setCurrentSong]: [any, Function] = React.useState({
         name: 'Nothing',
         artist: 'Nothing',
@@ -39,13 +52,21 @@ export default function Ui() {
         album_cover: '',
         uri: '',
     })
+
+    React.useEffect(() => {
+        console.log('Updated queue through useEffect')
+        socket.emit('queue', 'update', queue)
+    }, [queue, socket])
+
+    React.useEffect(() => {
+        socket.emit('current', 'update', currentSong)
+    }, [currentSong, socket])
     
     React.useEffect(() => {
         if (parseUrl(window.location.href, localStorage.getItem('state')) !== null && token === '') {
             setToken(parseUrl(window.location.href, localStorage.getItem('state')));
             window.history.replaceState({}, document.title, "/Ui");
         }
- 
         if (token !== '') {
             console.log('Afspelende nummer wordt voor het eerst opgehaald')
             getSongInfo(token)
@@ -93,6 +114,8 @@ export default function Ui() {
 
         if (event.target.value === '') {
             setSearchData([])
+        } else if (event.keyCode === 13) {
+            search(searchToken, event.target.value).then(data => setSearchData(data.data.tracks.items)).catch(err => console.log('error', err))
         } else {
             timer = setTimeout(() => {
                 search(searchToken, event.target.value).then(data => setSearchData(data.data.tracks.items)).catch(err => console.log('error', err))
@@ -130,24 +153,7 @@ export default function Ui() {
         .catch(err => console.log('error', err))
     }
 
-    const listSearch = (data: any) => {
-        const searchList = data.map((song: any, index: number) => {
-            return <Song
-                key={index}
-                src={song.album.images[1].url}
-                song={song.name}
-                artist={song.artists[0].name}
-                onClick={() => {
-                    setSelectedSong({uri: song.uri});
-                }}
-            />
-        });
-        if (searchList.length !== 0) {
-            return (
-                <div className="SearchList">{searchList}</div>
-            )
-        } else return null
-    };
+
 
     const returnURL = (url: string) => 'url(' + url + ')';
     const capitalize = (song: string) => song.charAt(0).toUpperCase() + song.slice(1);
@@ -203,7 +209,7 @@ export default function Ui() {
                         <div className="Button" onClick={() => addToQueue(token, selectedSong.uri).then(res => console.log(res))}>
                             Add song to queue
                         </div>
-                        {listSearch(searchData)}
+                        <SongList data={searchData}/>
                     </div>
                 </div>
             </div>

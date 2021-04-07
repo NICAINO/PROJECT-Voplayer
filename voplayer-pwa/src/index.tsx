@@ -6,6 +6,12 @@ import reportWebVitals from './reportWebVitals';
 
 import Home from './Home';
 import Ui from './host/Ui';
+import ClientUi from './client/Ui';
+
+import { io } from "socket.io-client";
+
+const ipAdress = 'localhost:3050'
+const socket = io('http://' + ipAdress)
 
 ReactDOM.render(
   <Route.BrowserRouter>
@@ -14,8 +20,11 @@ ReactDOM.render(
         <Route.Route exact path="/">
           <Home/>
         </Route.Route>
-        <Route.Route path="/Ui">
-          <Ui/>
+        <Route.Route exact path="/Ui">
+          <Ui socket={socket}/>
+        </Route.Route>
+        <Route.Route exact path="/client/Ui">
+          <ClientUi socket={socket}/>
         </Route.Route>
       </Route.Switch>
     </React.StrictMode>
