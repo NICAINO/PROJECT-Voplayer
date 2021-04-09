@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { parseUrl } from '../modules/Authentication'
-import { addToQueue, getSongInfo, play, pause, search, nextSong, previousSong } from '../modules/Playback'
+import { addToQueue, getSongInfo, playSong , pauseSong, search, nextSong, previousSong } from '../modules/Playback'
 
 import '../Styling.css';
-import Song from '../components/song';
+//import Song from '../components/song';
 import SongList from '../components/songList';
 
 let searchToken: string = '';
@@ -15,26 +15,7 @@ type SongType = {
     uri: string
 };
 
-
 export default function Ui({socket}: any) {
-    // const socket = io('http://' + ipAdress)
-    // socket.emit('group', 'host');
-    // socket.on("searchAuth", (token: string) => {
-    //     searchToken = token;
-    // });
-    // socket.on('commands', (arg) => {
-    //     if (arg === 'updateQueue') {
-    //         socket.emit('queue', 'update', queue)
-    //     }
-    // });
-
-    React.useEffect(() => {
-        console.log('Je bent er!', socket)
-        socket.emit('group', 'host')
-    }, [socket])
-    
-    
-    let updateSongTimer: any = React.useRef(null);
     const [token, setToken]: [string, Function] = React.useState('');
     const [searchInput, setSearchInput]: [string, Function] = React.useState('')
     const [searchData, setSearchData]: [Array<string>, Function] = React.useState([])
@@ -52,6 +33,14 @@ export default function Ui({socket}: any) {
         album_cover: '',
         uri: '',
     })
+    let updateSongTimer: any = React.useRef(null);
+
+    React.useEffect(() => {
+        console.log('Je bent er!', socket)
+        socket.emit('group', 'host')
+    }, [socket])
+    
+
 
     React.useEffect(() => {
         console.log('Updated queue through useEffect')
@@ -59,6 +48,7 @@ export default function Ui({socket}: any) {
     }, [queue, socket])
 
     React.useEffect(() => {
+        console.log('Updated song through useEffect')
         socket.emit('current', 'update', currentSong)
     }, [currentSong, socket])
     
@@ -70,19 +60,9 @@ export default function Ui({socket}: any) {
         if (token !== '') {
             console.log('Afspelende nummer wordt voor het eerst opgehaald')
             getSongInfo(token)
-            .then((res: any) => {
-                if (res.data !== "") {
-                    setCurrentSong({
-                        name: res.data.item.name,
-                        artist: res.data.item.artists[0].name,
-                        album_cover: res.data.item.album.images[0].url,
-                        current_ms: res.data.progress_ms,
-                        total_ms: res.data.item.duration_ms,
-                    })
-                }
-            })
-            .catch(err => console.log('error', err))
+            .then(updateCurrentSong)
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     React.useLayoutEffect(() => {
@@ -90,20 +70,12 @@ export default function Ui({socket}: any) {
         updateSongTimer.current = setTimeout(() => {
             console.log('Afspelende nummer wordt opgehaald')
             getSongInfo(token)
-            .then((res: any) => {
-                setCurrentSong({
-                    name: res.data.item.name,
-                    artist: res.data.item.artists[0].name,
-                    album_cover: res.data.item.album.images[0].url,
-                    current_ms: res.data.progress_ms,
-                    total_ms: res.data.item.duration_ms,
-                })
-            })
-            .catch(err => console.log('error', err))
+            .then(updateCurrentSong)
         }, currentSong.total_ms - currentSong.current_ms + 250); 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token, currentSong])
 
-    React.useLayoutEffect(() => {
+    React.useEffect(() => {
         console.log('currentSong: ', currentSong)
     }, [currentSong])
 
@@ -123,37 +95,62 @@ export default function Ui({socket}: any) {
         }
     }
 
-    function next() {
+    const updateCurrentSong = async() => {
+        //Call dit liefst in .then(hier) denk ik
+        setTimeout(() => {
+            getSongInfo(token)
+            .then((res: any) => setCurrentSong({
+                name: res.data.item.name,
+                artist: res.data.item.artists[0].name,
+                album_cover: res.data.item.album.images[0].url,
+                current_ms: res.data.progress_ms,
+                total_ms: res.data.item.duration_ms,
+            })).catch((error) => console.log("Error bij updateCurrentSOng: ", error))
+        }, 250)
+        return
+    }
+
+    //Gestandaardiseerde functies voor socket commands
+    const play = async(uriArray?: Array<string>) => {
+        if (uriArray === undefined) {
+            console.log("Playing")
+            playSong(token)
+                .then(updateCurrentSong)
+                .catch(err => console.log("Error playing", err))
+        } else {
+            console.log("Playing Song")
+            playSong(token, uriArray)
+                .then(updateCurrentSong)
+                .catch(err => console.log("Error playing songs: ",uriArray, err))
+        }
+    };
+
+    const pause = async() => {
+        console.log('Pausing')
+        pauseSong(token)
+            .then(updateCurrentSong)
+            .catch(err => console.log("Error pausing: ", err))
+    };
+
+    const next = async() => {
         console.log("Next song")
         nextSong(token)
-        .then(() => setTimeout(() => {getSongInfo(token)
-            .then((res: any) => setCurrentSong({
-                name: res.data.item.name,
-                artist: res.data.item.artists[0].name,
-                album_cover: res.data.item.album.images[0].url,
-                current_ms: res.data.progress_ms,
-                total_ms: res.data.item.duration_ms,
-            }))
-        }, 250))
-        .catch(err => console.log('error', err))
-    }
+            .then(updateCurrentSong)
+            .catch(err => console.log('Error nexting: ', err))
+    };
 
-    function prev() {
-        console.log("Next song")
+    const previous = async() => {
+        console.log("Previous song")
         previousSong(token)
-        .then(() => setTimeout(() => {getSongInfo(token)
-            .then((res: any) => setCurrentSong({
-                name: res.data.item.name,
-                artist: res.data.item.artists[0].name,
-                album_cover: res.data.item.album.images[0].url,
-                current_ms: res.data.progress_ms,
-                total_ms: res.data.item.duration_ms,
-            }))
-        }, 250))
-        .catch(err => console.log('error', err))
-    }
+            .then(updateCurrentSong)
+            .catch(err => console.log("Error previoussonging: ", err))
+    };
 
-
+    const toQueue = async() => {
+        addToQueue(token, selectedSong.uri)
+            .then(res => console.log(res))
+            .catch(err => console.log("Error adding to queue: ", err))
+    };
 
     const returnURL = (url: string) => 'url(' + url + ')';
     const capitalize = (song: string) => song.charAt(0).toUpperCase() + song.slice(1);
@@ -173,41 +170,24 @@ export default function Ui({socket}: any) {
                     <div className="Player">
                         <p>{capitalize(currentSong.name)} from {currentSong.artist}</p>
                         <div className="PlayerImage" style={{backgroundImage: returnURL(currentSong.album_cover)}}/>
-                        {/* ik snap ook wel dat de jsx hier beter kan is gewoon voor de functies in playback.tsx */}
-                        <div className="Button" onClick={() => {next()}}>
+                        <div className="Button" onClick={() => next()}>
                             Next
                         </div>
                         <div className="MediaButtons">
-                            <div className="Button" onClick={() => {
-                                console.log('Play')
-                                play(token).then()
-                                getSongInfo(token)
-                                    .then((res: any) => {
-                                        setCurrentSong({
-                                            name: res.data.item.name,
-                                            artist: res.data.item.artists[0].name,
-                                            album_cover: res.data.item.album.images[0].url,
-                                            current_ms: res.data.progress_ms,
-                                            total_ms: res.data.item.duration_ms,
-                                        })
-                                    })
-                                }}>
-                                Play
-                            </div>
-                            <div className="Button" onClick={() => {console.log('Pause'); pause(token)}}>
-                                pause
-                            </div>
-                            <div className="Button" onClick={() => {prev()}}>
-                                Prev
-                            </div>
+                            <div className="Button" onClick={() => play()}>Play</div>
+                            <div className="Button" onClick={() => pause()}>Pause</div>
+                            <div className="Button" onClick={() => previous()}>Previous</div>
                         </div>
                     </div>
                     <div className="Queue">
                         <div className="Button" onClick={() => {socket.emit('searchAuth', 'new')}}>
                             Refresh token
                         </div>
-                        <div className="Button" onClick={() => addToQueue(token, selectedSong.uri).then(res => console.log(res))}>
+                        <div className="Button" onClick={() => toQueue()}>
                             Add song to queue
+                        </div>
+                        <div className="Button" onClick={() => play(["spotify:track:1X4ZkhlRRohkV33cITaJYs"])}>
+                            Play Madison Beer Baby
                         </div>
                         <SongList data={searchData}/>
                     </div>

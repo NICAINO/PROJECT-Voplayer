@@ -9,9 +9,6 @@ const io = require("socket.io")(httpServer,{
 const axios = require('axios')
 const auth = require('./auth').auth
 const port = 3050;
-const data = {
-    playlist: [],
-}
 let searchToken = '';
 
 const hourlyRefresh = async() => {() => {
@@ -28,26 +25,29 @@ const hourlyRefresh = async() => {() => {
 hourlyRefresh()
 
 io.on("connection", (socket) => {
-    // io.to(socket.id).emit('searchAuth', searchToken)
+    io.to(socket.id).emit('searchAuth', searchToken)
 
-    socket.on('group', (arg) => {
+    socket.on('group', (arg, id) => {
         if (arg === 'host') {
             socket.join('host')
             console.log('User: ', socket.id, 'joined as Host')
         } else if (arg === 'client') {
             socket.join('clients')
+            io.to(id).emit('Joined clients')
             console.log('User: ', socket.id, 'joined as Client')
         }
     });
 
     socket.on('current', (arg, data) => {
         if (arg === 'update') {
+            console.log('Nieuwe song')
             io.to('clients').emit('currentUpdate', data)
         }
     });
 
     socket.on('queue', (arg,  queue) => {
         if (arg === 'update') {
+            console.log('Nieuwe queue')
             io.to('clients').emit('queueUpdate', queue)
         }
     });
@@ -60,9 +60,10 @@ io.on("connection", (socket) => {
 
     //SOCKET ID FUNCTIONS
 
-    socket.on('searchAuth', (arg) => {
+    socket.on('searchAuth', (arg, id) => {
         if (arg === 'refresh') {
-            io.emit('searchAuth', searchToken)
+            console.log('Er is een token gestuurd naar', id)
+            io.to(id).emit('searchAuth', searchToken)
         } else if (arg === 'new') {
             console.log('generate new token')
             axios({

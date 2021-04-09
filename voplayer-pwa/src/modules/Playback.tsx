@@ -31,22 +31,38 @@ export const getSongInfo = async(token: string) => {
     return Promise
 }
 
-export const play = async(token: string) => {
+export const playSong = async(token: string, uriArray?: Array<string>) => {
     // Er kunnen nummer uris doorgegeven worden om af te spelen!!
-    const Promise = axios({
-        url: 'https://api.spotify.com/v1/me/player/play',
-        method: 'put',
-        // data: undefined,
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-        }
-    })
-    return Promise
+    if (uriArray === undefined) {
+        const Promise = axios({
+            url: 'https://api.spotify.com/v1/me/player/play',
+            method: 'put',
+            // data: undefined,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        })
+        return Promise
+    } else {
+        const Promise = axios({
+            url: 'https://api.spotify.com/v1/me/player/play',
+            method: 'put',
+            data: {
+                uris: uriArray
+            },
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        })
+        return Promise
+    }   
 }
 
-export const pause = async(token: string) => {
+export const pauseSong = async(token: string) => {
     // Er kunnen nummer uris doorgegeven worden om af te spelen!!
     const Promise = axios({
         url: 'https://api.spotify.com/v1/me/player/pause',
@@ -86,7 +102,7 @@ export const previousSong = async(token: string) => {
     return Promise
 }
 
-export const search = async(searchToken: string, query: string) => {
+export const search = async(searchToken: string | null, query: string) => {
     var string = query.trim().replace(/\s+/g, '+')
     const Promise = axios({
         url: 'https://api.spotify.com/v1/search'
