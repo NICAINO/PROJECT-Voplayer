@@ -34,13 +34,45 @@ export default function Ui({socket}: any) {
         uri: '',
     })
     let updateSongTimer: any = React.useRef(null);
+    let currentSongRef: any = React.useRef(currentSong);
+    currentSongRef.current = currentSong;
+    let queueRef: any = React.useRef(queue);
+    queueRef.current = queue;
 
     React.useEffect(() => {
-        console.log('Je bent er!', socket)
+        //Wees dom
         socket.emit('group', 'host')
-    }, [socket])
-    
 
+        socket.on('Joined as host', initialActions);
+
+        //Eventuele shit
+        socket.on('commands', (arg: string) => {
+            console.log('Een client heeft aandacht nodig')
+            commands(arg)
+        })
+
+        //Disconnect bij unmount
+        return () => {
+            socket.disconnect()
+        }
+    }, [socket])
+
+    const initialActions = React.useCallback(() => {
+        socket.emit('queue', 'update', queueRef.current);
+        socket.emit('current', 'update', currentSongRef.current);
+    }, [socket])
+
+    const commands = React.useCallback((command: string) => {
+        switch (command) {
+            case 'updateQueue':
+                break;
+            case 'currentSong':
+                console.log('Huidig nummer verstuurd', currentSongRef.current)
+                socket.emit('current', 'update', currentSongRef.current)
+                break;
+            default:         
+        }
+    }, [socket])
 
     React.useEffect(() => {
         console.log('Updated queue through useEffect')
@@ -79,7 +111,7 @@ export default function Ui({socket}: any) {
         console.log('currentSong: ', currentSong)
     }, [currentSong])
 
-    function setSearch(event: any) {
+    const setSearch = React.useCallback((event: any) => {
         setSearchInput(event.target.value)
         let timer;
         clearTimeout(timer)
@@ -93,9 +125,9 @@ export default function Ui({socket}: any) {
                 search(searchToken, event.target.value).then(data => setSearchData(data.data.tracks.items)).catch(err => console.log('error', err))
             }, 250);
         }
-    }
+    }, [])
 
-    const updateCurrentSong = async() => {
+    const updateCurrentSong = React.useCallback(() => {
         //Call dit liefst in .then(hier) denk ik
         setTimeout(() => {
             getSongInfo(token)
@@ -108,10 +140,10 @@ export default function Ui({socket}: any) {
             })).catch((error) => console.log("Error bij updateCurrentSOng: ", error))
         }, 250)
         return
-    }
+    }, [token])
 
     //Gestandaardiseerde functies voor socket commands
-    const play = async(uriArray?: Array<string>) => {
+    const play = React.useCallback((uriArray ? : Array<string>) => {
         if (uriArray === undefined) {
             console.log("Playing")
             playSong(token)
@@ -121,36 +153,36 @@ export default function Ui({socket}: any) {
             console.log("Playing Song")
             playSong(token, uriArray)
                 .then(updateCurrentSong)
-                .catch(err => console.log("Error playing songs: ",uriArray, err))
+                .catch(err => console.log("Error playing songs: ", uriArray, err))
         }
-    };
+    }, [token, updateCurrentSong])
 
-    const pause = async() => {
+    const pause = React.useCallback(() => {
         console.log('Pausing')
         pauseSong(token)
             .then(updateCurrentSong)
             .catch(err => console.log("Error pausing: ", err))
-    };
+    }, [token, updateCurrentSong]);
 
-    const next = async() => {
+    const next = React.useCallback(() => {
         console.log("Next song")
         nextSong(token)
             .then(updateCurrentSong)
             .catch(err => console.log('Error nexting: ', err))
-    };
+    }, [token, updateCurrentSong]);
 
-    const previous = async() => {
+    const previous = React.useCallback(() => {
         console.log("Previous song")
         previousSong(token)
             .then(updateCurrentSong)
             .catch(err => console.log("Error previoussonging: ", err))
-    };
+    }, [token, updateCurrentSong]);
 
-    const toQueue = async() => {
-        addToQueue(token, selectedSong.uri)
+    const toQueue = React.useCallback((uri: string) => {
+        addToQueue(token, uri)
             .then(res => console.log(res))
             .catch(err => console.log("Error adding to queue: ", err))
-    };
+    }, [token]);
 
     const returnURL = (url: string) => 'url(' + url + ')';
     const capitalize = (song: string) => song.charAt(0).toUpperCase() + song.slice(1);
@@ -183,7 +215,7 @@ export default function Ui({socket}: any) {
                         <div className="Button" onClick={() => {socket.emit('searchAuth', 'new')}}>
                             Refresh token
                         </div>
-                        <div className="Button" onClick={() => toQueue()}>
+                        <div className="Button" onClick={() => toQueue(currentSong.uri)}>
                             Add song to queue
                         </div>
                         <div className="Button" onClick={() => play(["spotify:track:1X4ZkhlRRohkV33cITaJYs"])}>

@@ -15,8 +15,6 @@ type SongType = {
 //     searchToken = token;
 // });
 
-// socket.onAny((key, arg) => console.log("key:",key,"arg:", arg))
-
 export default function ClientUi({socket}: any) {
     const [queue, setQueue]: [Array<SongType>, Function] = React.useState([]);
     const [currentSong, setCurrentSong]: [any, Function] = React.useState('');
@@ -29,12 +27,16 @@ export default function ClientUi({socket}: any) {
         socket.emit('group', 'client', socket.id)
 
         //Initial info
-        const eventHandler = () => {
+        const initialActions = () => {
             console.log('Joined clients')
+            console.time('vo')
             socket.emit('searchAuth', 'refresh', socket.id)
-        }
-        socket.on('Joined clients', eventHandler);
+            socket.emit('commands', 'currentSong')
 
+        }
+        socket.on('Joined clients', initialActions);
+
+        //Eventuele shit
         socket.on('queueUpdate', (arg: Array<SongType>) => {
             setQueue(arg)
             console.log('Updated queue after request')
@@ -48,7 +50,7 @@ export default function ClientUi({socket}: any) {
             console.log('Er is een nieuw search token', arg)
         });
 
-        //Disconnect on unmount
+        //Disconnect bij unmount
         return () => {
             socket.disconnect()
         };

@@ -27,13 +27,14 @@ hourlyRefresh()
 io.on("connection", (socket) => {
     io.to(socket.id).emit('searchAuth', searchToken)
 
-    socket.on('group', (arg, id) => {
+    socket.on('group', (arg) => {
         if (arg === 'host') {
             socket.join('host')
+            io.to('host').emit('Joined as host')
             console.log('User: ', socket.id, 'joined as Host')
         } else if (arg === 'client') {
             socket.join('clients')
-            io.to(id).emit('Joined clients')
+            io.to(socket.id).emit('Joined clients')
             console.log('User: ', socket.id, 'joined as Client')
         }
     });
@@ -52,9 +53,16 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on('commands', (arg) => {
-        if (arg === 'updateQueue') {
-            io.to('host').emit('commands', 'updateQueue')
+    socket.on('commands', arg => {
+        switch (arg) {
+            case 'updateQueue': 
+                io.to('host').emit('commands', 'updateQueue')
+                break
+            case 'currentSong':
+                console.log('Ik ga de currentSong vragen')
+                io.to('host').emit('commands', 'currentSong')
+                break
+            default:
         }
     });
 
