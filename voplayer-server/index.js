@@ -11,21 +11,34 @@ const auth = require('./auth').auth
 const port = 3050;
 let searchToken = '';
 
-const hourlyRefresh = async() => {() => {
-    setInterval(axios({
+const getToken = () => {
+    axios({
         url: 'https://accounts.spotify.com/api/token?grant_type=client_credentials',
         method: 'post',
         headers: {
             Authorization: 'Basic ' + Buffer.from(auth.client_id + ':' + auth.client_secret).toString('base64')
         }
-    }).then(res => res.data.access_token).then(data => searchToken = data).then(console.log('Refreshed: '))
-    , 1000 * 60 * 59)}
+    })
+        .then(res => res.data.access_token)
+        .then(data => {searchToken = data; console.log('Got new token!')})
+        .catch(err => console.log("err with getting token: ", err))
+    setInterval(() => {
+        axios({
+            url: 'https://accounts.spotify.com/api/token?grant_type=client_credentials',
+            method: 'post',
+            headers: {
+            Authorization: 'Basic ' + Buffer.from(auth.client_id + ':' + auth.client_secret).toString('base64')
+            }
+        })
+            .then(res => res.data.access_token)
+            .then(data => {searchToken = data; console.log('Got new token!'); io.emit('searchAuth', data)})
+            .catch(err => console.log("err with getting token: ", err))
+    }, 1000 * 60 * 59);
 }
 
-hourlyRefresh()
+getToken()
 
 io.on("connection", (socket) => {
-    io.to(socket.id).emit('searchAuth', searchToken)
 
     socket.on('group', (arg) => {
         if (arg === 'host') {
@@ -41,19 +54,19 @@ io.on("connection", (socket) => {
 
     socket.on('current', (arg, data) => {
         if (arg === 'update') {
-            console.log('Nieuwe song')
+            // console.log('Nieuwe song')
             io.to('clients').emit('currentUpdate', data)
         }
     });
 
     socket.on('queue', (arg,  queue) => {
         if (arg === 'update') {
-            console.log('Nieuwe queue')
+            // console.log('Nieuwe queue')
             io.to('clients').emit('queueUpdate', queue)
         }
     });
 
-    socket.on('commands', arg => {
+    socket.on('commands', (arg, data) => {
         switch (arg) {
             case 'updateQueue': 
                 io.to('host').emit('commands', 'updateQueue')
@@ -61,7 +74,22 @@ io.on("connection", (socket) => {
             case 'currentSong':
                 console.log('Ik ga de currentSong vragen')
                 io.to('host').emit('commands', 'currentSong')
-                break
+                break;
+            case 'addToQueue':
+                io.to('host').emit('commands', 'addToQueue', data)
+                break;
+            case 'play':
+                io.to('host').emit('commands', 'play');
+                break;
+            case 'pause':
+                io.to('host').emit('commands', 'pause');
+                break;
+            case 'next':
+                io.to('host').emit('commands', 'next');
+                break;
+            case 'previous':
+                io.to('host').emit('commands', 'previous');
+                break;
             default:
         }
     });

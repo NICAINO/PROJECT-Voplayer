@@ -1,0 +1,6 @@
+<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Play button">
+<circle id="Circle" cx="5" cy="5" r="4" fill="white"/>
+<path id="Triangle" d="M7.5 5L3.75 7.16506L3.75 2.83494L7.5 5Z" fill="#8E8E8E"/>
+</g>
+</svg>

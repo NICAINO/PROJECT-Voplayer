@@ -1,5 +1,5 @@
 /* eslint-disable no-useless-escape */
-export const genUrl = (state: string) => {
+export const genUrl = (state: string | any) => {
   const url = 'https://accounts.spotify.com/authorize'
     .concat('?client_id=df27f8d7f750447aafefa4cd5399d605')
     .concat('&response_type=token')
@@ -15,3 +15,11 @@ export const parseUrl = (url: any, state: string | null) => {
     return url.match(/\#(?:access_token)\=([\S\s]*?)\&/)[1];
   } else return null
 } 
+
+export const generateState = () => {
+  return new Promise((resolve, reject) => {
+    const state: string = JSON.stringify(Math.random())
+    localStorage.setItem('state', state)
+    resolve(state)
+  })
+}

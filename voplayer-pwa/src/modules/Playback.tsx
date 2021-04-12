@@ -11,10 +11,9 @@ export const addToQueue = async(token: string, uri: string) => {
                 'Authorization': 'Bearer ' + token
             }
         });
-        return true
+        console.log('Song added to queue')
     } catch (error) {
         console.log('Error in AddToQueue: ', error)
-        return false
     }
 };
 
@@ -103,18 +102,23 @@ export const previousSong = async(token: string) => {
 }
 
 export const search = async(searchToken: string | null, query: string) => {
-    var string = query.trim().replace(/\s+/g, '+')
-    const Promise = axios({
-        url: 'https://api.spotify.com/v1/search'
-            .concat('?q=', string)
-            .concat('&type=track')
-            .concat('&market=NL')
-            .concat('&limit=5'),
-        method: 'get',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + searchToken
+    return new Promise((resolve, reject) => {
+        var string = query.trim().replace(/\s+/g, '+')
+        if (query !== '') {
+            axios({
+                url: 'https://api.spotify.com/v1/search'
+                    .concat('?q=', string)
+                    .concat('&type=track')
+                    .concat('&market=NL')
+                    .concat('&limit=5'),
+                method: 'get',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + searchToken
+                }
+            }).then(data => resolve(data))
+        } else {
+            resolve({data: {tracks: {items: []}}})
         }
     })
-    return Promise
 }

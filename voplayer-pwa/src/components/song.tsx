@@ -1,4 +1,5 @@
 import './songStyle.css';
+import threeDots from '../assets/ThreeDots.svg'
 
 export default function Song(props: any) {
     return (
@@ -15,9 +16,7 @@ export default function Song(props: any) {
                 </div>
             </div>
             <div className="Icon">
-                <div className="Dot"/>
-                <div className="Dot"/>
-                <div className="Dot"/>
+                <img style={{height: '50%'}} src={threeDots} alt="dots"/>
             </div>
         </div>
     )

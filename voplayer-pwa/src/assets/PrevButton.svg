@@ -1,0 +1,7 @@
+<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="PrevButton">
+<circle id="Circle" cx="5" cy="5" r="4" transform="rotate(-180 5 5)" fill="white"/>
+<path id="Triangle" d="M3 5L6.75 2.83494L6.75 7.16506L3 5Z" fill="#8E8E8E"/>
+<rect id="Rectangle 1" x="4" y="7" width="1" height="4" transform="rotate(-180 4 7)" fill="#8E8E8E"/>
+</g>
+</svg>
