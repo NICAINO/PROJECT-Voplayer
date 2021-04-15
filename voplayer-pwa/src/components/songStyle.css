@@ -12,8 +12,9 @@
   justify-content: space-between;
   aspect-ratio: 9;
   width: 100%;
-  margin-bottom: 1vw;
-  border: 1px solid brown;
+  background-color: #3333336b;
+  padding-top: 0.5vw;
+  padding-bottom: 0.5vw;
 }
 
 .Song {
@@ -22,7 +23,6 @@
   flex-direction: row;
   align-items: center;
   width: 90%;
-  border: 1px solid yellow;
 }
 
 .SongDescription {
@@ -32,7 +32,6 @@
   justify-content: space-between;
   margin-left: 1%;
   width: 100%;
-  border: 1px solid olivedrab;
   overflow: hidden;
 }
 
@@ -42,10 +41,12 @@
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  color: white;
 }
 
 .Artist {
   font-size: 1.2vw;
+  color: white;
 }
 
 .Icon {
@@ -54,13 +55,11 @@
   flex: 1;
   align-items: center;
   justify-content: center;
-  border: 1px solid mediumaquamarine;
 }
 
 .Dot {
   height: 10%;
   aspect-ratio: 1;
   border-radius: 25%;
-  background-color: aquamarine;
   margin: 5%;
 }

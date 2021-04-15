@@ -22,10 +22,14 @@ function reducer(state: any, action: {type: string, payload: SongType}) {
         case 'update':
             let newQueue = [...state.queue, action.payload]
             return {queue: newQueue}
-    default:
-        throw new Error();
+        case 'next':
+            let shiftedQueue = [...state.queue]
+            shiftedQueue.shift()
+            return {queue: shiftedQueue}
+        default:
+            throw new Error();
     }
-}
+};
 
 export default function Ui({socket}: any) {
     const [state, dispatch]: [{queue: Array<SongType>}, any] = React.useReducer(reducer, {queue: []})
@@ -45,8 +49,8 @@ export default function Ui({socket}: any) {
     const updateSearchTimer: any = React.useRef(null);
     const currentSongRef: any = React.useRef(currentSong);
     currentSongRef.current = currentSong;
-    const queueRef: any = React.useRef(state.queue);
-    queueRef.current = state.queue;
+    const stateRef: any = React.useRef(state);
+    stateRef.current = state;
     const searchTokenRef: any = React.useRef(searchToken);
     searchTokenRef.current = searchToken;
     const tokenRef: any = React.useRef(token);
@@ -61,7 +65,7 @@ export default function Ui({socket}: any) {
         //Inititial actions
         const initialActions = () => {
             if (currentSongRef.current.name !== 'Nothing') {
-                // socket.emit('queue', 'update', queueRef.current);
+                socket.emit('queue', 'update', stateRef.current.queue);
                 socket.emit('current', 'update', currentSongRef.current);
             }
             socket.emit('searchAuth', 'refresh', socket.id)
@@ -74,8 +78,8 @@ export default function Ui({socket}: any) {
             console.log('Een client heeft aandacht nodig')
             switch (arg) {
                 case 'updateQueue':
-                    console.log('Huidige queue verstuurd', queueRef.current)
-                    socket.emit('queue', 'update', queueRef.current)
+                    console.log('Huidige queue verstuurd', stateRef.current.queue)
+                    socket.emit('queue', 'update', stateRef.current.queue)
                     break;
                 case 'currentSong':
                     console.log('Huidig nummer verstuurd', currentSongRef.current)
@@ -86,7 +90,7 @@ export default function Ui({socket}: any) {
                     addToQueue(tokenRef.current, data.uri)
                     break;
                 case 'play':
-                    play()
+                    play(tokenRef.current)
                     break
                 case 'pause':
                     pause()
@@ -110,12 +114,13 @@ export default function Ui({socket}: any) {
         return () => {
             socket.disconnect()
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [socket])
 
     React.useEffect(() => {
-        if (queueRef.current !== []) {
-            console.log('Updated queue through useEffect')
-            socket.emit('queue', 'update', queueRef.current)
+        if (state.queue !== []) {
+            console.log('Updated queue through useEffect', state.queue)
+            socket.emit('queue', 'update', state.queue)
         }
     }, [socket, state.queue])
 
@@ -179,30 +184,31 @@ export default function Ui({socket}: any) {
         //Call dit liefst in .then(hier) denk ik
         setTimeout(() => {
             getSongInfo(Token)
-            .then((res: any) => setCurrentSong({
-                name: res.data.item.name,
-                artist: res.data.item.artists[0].name,
-                album_cover: res.data.item.album.images[0].url,
-                current_ms: res.data.progress_ms,
-                total_ms: res.data.item.duration_ms,
-            })).catch((error) => console.log("Error bij updateCurrentSong: ", error))
+                .then((res: any) => setCurrentSong({
+                    name: res.data.item.name,
+                    artist: res.data.item.artists[0].name,
+                    album_cover: res.data.item.album.images[0].url,
+                    current_ms: res.data.progress_ms,
+                    total_ms: res.data.item.duration_ms,
+                }))
+                .catch((error) => console.log("Error bij updateCurrentSong: ", error))
         }, 250)
-    }
+    };
 
     //Gestandaardiseerde functies voor socket commands
-    const play = React.useCallback((uriArray ? : Array<string>) => {
+    const play = (Token: string, uriArray? : Array<string>) => {
         if (uriArray === undefined) {
             console.log("Playing")
-            playSong(tokenRef.current)
-                .then(() => updateCurrentSong(token))
+            playSong(Token)
+                .then(() => updateCurrentSong(Token))
                 .catch(err => console.log("Error playing", err))
         } else {
             console.log("Playing Song")
-            playSong(tokenRef.current, uriArray)
-                .then(() => updateCurrentSong(token))
+            playSong(Token, uriArray)
+                .then(() => updateCurrentSong(Token))
                 .catch(err => console.log("Error playing songs: ", uriArray, err))
         }
-    }, [updateCurrentSong])
+    };
     
     const toSearchList = (data: any) => {
         const searchList = data.map((song: any, index: number) => {
@@ -242,26 +248,29 @@ export default function Ui({socket}: any) {
         } else return null
     }
 
-    const pause = React.useCallback(() => {
+    const pause = () => {
         console.log('Pausing')
         pauseSong(tokenRef.current)
-            .then(() => updateCurrentSong(token))
+            .then(() => updateCurrentSong(tokenRef.current))
             .catch(err => console.log("Error pausing: ", err))
-    }, [updateCurrentSong]);
+    };
 
-    const next = React.useCallback(() => {
+    const next = () => {
         console.log("Next song")
         nextSong(tokenRef.current)
-            .then(() => updateCurrentSong(token))
+            .then(() => {
+                updateCurrentSong(tokenRef.current)
+                dispatch({type: 'next', payload: {}})
+            })
             .catch(err => console.log('Error nexting: ', err))
-    }, [updateCurrentSong]);
+    };
 
-    const previous = React.useCallback(() => {
+    const previous = () => {
         console.log("Previous song")
         previousSong(tokenRef.current)
-            .then(() => updateCurrentSong(token))
+            .then(() => updateCurrentSong(tokenRef.current))
             .catch(err => console.log("Error previoussonging: ", err))
-    }, [updateCurrentSong]);
+    };
 
     const returnURL = (url: string) => 'url(' + url + ')';
 
@@ -269,6 +278,7 @@ export default function Ui({socket}: any) {
         <div className="Background" style={{backgroundImage: returnURL(currentSongRef.current.album_cover)}}>
             <div className="App">
                 <div className="TopBar">
+                <div onClick={() => {setTyping(false); setSearchInput('')}} style={{flex: 1, height: '100%'}}/>
                     <input 
                         className="SearchBar" 
                         value={searchInput} 
@@ -285,7 +295,7 @@ export default function Ui({socket}: any) {
                         
                         <div className="MediaButtons">
                             <img className="MediaButton" src={PrevButton} alt="previous" onClick={() => previous()}/>
-                            <img className="MediaButton" src={PlayButton} alt="play" onClick={() => play()}/>
+                            <img className="MediaButton" src={PlayButton} alt="play" onClick={() => play(tokenRef.current)}/>
                             <img className="MediaButton" src={PauseButton} alt="pause" onClick={() => pause()}/>
                             <img className="MediaButton" src={NextButton} alt="next" onClick={() => next()}/>                        
                         </div>
@@ -294,16 +304,10 @@ export default function Ui({socket}: any) {
                         <div className="Button" onClick={() => {socket.emit('searchAuth', 'new')}}>
                             Refresh token
                         </div>
-                        <div className="Button" onClick={() => play(["spotify:track:1X4ZkhlRRohkV33cITaJYs"])}>
+                        <div className="Button" onClick={() => play(tokenRef.current, ["spotify:track:1X4ZkhlRRohkV33cITaJYs"])}>
                             Play Madison Beer Baby
                         </div>
-                        <div className="Button" onClick={() => dispatch({type: 'update', payload: {
-                            name: 'Nothing',
-                            artist: 'Nothing',
-                            album_cover: 'https://mulder-onions.com/wp-content/uploads/2017/02/White-square-300x300.jpg',
-                            current_ms: '0',
-                            total_ms: '100000',
-                        }})}>
+                        <div className="Button" onClick={() => dispatch({type: 'next', payload: {}})}>
                             Test
                         </div>
                         {typing ?

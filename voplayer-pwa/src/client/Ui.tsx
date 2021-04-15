@@ -126,6 +126,7 @@ export default function ClientUi({socket}: any) {
         <div className="Background" style={{backgroundImage: returnURL(currentSongRef.current.album_cover)}}>
             <div className="App">
                 <div className="TopBar">
+                    <div onClick={() => {setTyping(false); setSearchInput('')}} style={{flex: 1, height: '100%'}}/>
                     <input 
                         className="SearchBar" 
                         value={searchInput} 
