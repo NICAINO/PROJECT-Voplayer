@@ -6,6 +6,7 @@ import PauseButton from '../assets/PauseButton.svg'
 import NextButton from '../assets/NextButton.svg'
 import PrevButton from '../assets/PrevButton.svg'
 import Song from '../components/song'
+import { playNow } from '../modules/Queuefn'
 
 
 import '../Styling.css';
@@ -224,7 +225,8 @@ export default function Ui({socket}: any) {
                         album_cover: song.album.images[1].url,
                         uri: song.uri
                     }})
-                    //addToQueue(tokenRef.current, song.uri)
+                    addToQueue(tokenRef.current, song.uri)
+                        // .catch((err) => console.log('pog', err))
                     // setQueue((data: Array<any>) => [...data, 'pog'])
                 }}
             />
@@ -307,7 +309,15 @@ export default function Ui({socket}: any) {
                         <div className="Button" onClick={() => play(tokenRef.current, ["spotify:track:1X4ZkhlRRohkV33cITaJYs"])}>
                             Play Madison Beer Baby
                         </div>
-                        <div className="Button" onClick={() => dispatch({type: 'next', payload: {}})}>
+                        <div className="Button" onClick={async() => {
+                            let pog = await playNow(state.queue, {
+                                album_cover: "https://i.scdn.co/image/ab67616d00001e02eeb8d4a67a6e4441901457c4",
+                                artist: "Bad Gyal",
+                                name: "Zorra - Remix",
+                                uri: "spotify:track:6OkO3Qu7FbzYxWWB5iulck"
+                            })
+                            play(tokenRef.current, pog)
+                        }}>
                             Test
                         </div>
                         {typing ?

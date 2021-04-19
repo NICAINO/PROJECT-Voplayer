@@ -1,8 +1,7 @@
 import axios from 'axios'
 
 export const addToQueue = async(token: string, uri: string) => {
-    try {
-        await axios({
+        const vo = axios({
             url: 'https://api.spotify.com/v1/me/player/queue'
                 .concat('?uri=', uri), 
             method: 'post',
@@ -10,11 +9,20 @@ export const addToQueue = async(token: string, uri: string) => {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + token
             }
-        });
-        console.log('Song added to queue')
-    } catch (error) {
-        console.log('Error in AddToQueue: ', error)
-    }
+        })
+            .then(() => {console.log('Song added to queue')})
+            .catch(err => {
+                if (err.response.status === 401) {
+                    console.log("Unauthorized request when adding song to queue: ", err)
+                    // hier moet dus iets gebeuren dat ie een aanzoek doet om
+                    // een nieuwe token te halen maar ik kan op dit moment alleen
+                    // kkkkkkklelijke oplossingen bedenken.
+                } else if (err.response.status === 400) {
+                    console.log("Bad request sent when adding to queue (dus een bug): ", err)
+                } else {
+                    console.log("Something went really wrong while adding to queue: ", err)
+                }
+            })
 };
 
 export const getSongInfo = async(token: string) => {
